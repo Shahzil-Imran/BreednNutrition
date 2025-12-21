@@ -1,0 +1,17 @@
+# Virtual Environment
+venv/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment Variables (Keep your keys private!)
+.env
+
+# Editor settings
+.vscode/
+.idea/
+
+# Large Model Files (Recommended if >50MB)
+# models/*.h5
