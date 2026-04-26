@@ -13,7 +13,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Import inference logic from your TensorFlow model loader
-# Ensure model_loader.py is in the same folder
 from model_loader import predict_breed
 
 app = FastAPI(
@@ -54,7 +53,7 @@ def generate_nutrition_plan(breed: str, details: PetDetails) -> dict:
     # SYSTEM PROMPT: Enforces the exact JSON keys for your Flutter UI
     system_prompt = (
         "You are an expert veterinary nutritionist. "
-        "Analyze the dog breed and details provided. "
+        "Analyze the dog or cat breed and details provided. "
         "Respond ONLY with a raw JSON object (no markdown, no explanations). "
         "You MUST use this exact schema: "
         "{"
@@ -93,7 +92,6 @@ def generate_nutrition_plan(breed: str, details: PetDetails) -> dict:
 @app.post("/analyze-pet")
 async def analyze_pet(
     file: Annotated[UploadFile, File()],
-    # We make these optional so the request doesn't fail if the app only sends the image
     age_months: Optional[str] = Form("12"), 
     weight_kg: Optional[str] = Form("10")
 ):
@@ -103,8 +101,20 @@ async def analyze_pet(
         image_content = await file.read()
         image_stream = io.BytesIO(image_content)
 
-        # Step 1: Predict Breed
+        # Step 1: Predict Breed (Includes Gatekeeper check)
         breed_name, confidence_float = predict_breed(image_stream)
+        
+        # GATEKEEPER TRIGGER: Stop process if it's not a cat/dog
+        if breed_name == "NOT_A_PET":
+            print("Request Rejected: Image is not a recognized cat or dog.")
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "status": "rejected", 
+                    "message": "System Alert: Image is not recognized as a domestic cat or dog. Please upload a valid pet photo."
+                }
+            )
+
         print(f"Predicted: {breed_name} ({confidence_float})")
         
         # Format confidence for UI
@@ -122,6 +132,7 @@ async def analyze_pet(
 
         # Step 3: Return Response
         return {
+            "status": "success",
             "breed_name": breed_name,
             "confidence_score": confidence_str,
             "nutrition_plan": nutrition_data
@@ -131,7 +142,7 @@ async def analyze_pet(
         print(f"Server Error: {str(e)}")
         return JSONResponse(
             status_code=500,
-            content={"status": "error", "detail": str(e)}
+            content={"status": "error", "message": str(e)}
         )
 
 if __name__ == "__main__":
