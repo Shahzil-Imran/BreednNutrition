@@ -14,7 +14,7 @@ os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
 # --- 2. CONFIGURATION ---
 REPO_ID = "shah1zil/Smart_Paws_Breed_Model" 
-FILENAME = "best_breed_model_v1.h5"
+FILENAME = "best_breed_model.h5"
 IMAGE_SIZE = (224, 224)
 NUM_CLASSES = 10 
 
