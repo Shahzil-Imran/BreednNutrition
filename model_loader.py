@@ -2,10 +2,7 @@ import os
 import tensorflow as tf
 import numpy as np
 from PIL import Image
-from tensorflow.keras.applications import VGG16 
 from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2, preprocess_input, decode_predictions
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Flatten, Dropout
 from huggingface_hub import hf_hub_download
 
 # --- 1. SUPPRESS TENSORFLOW LOGS ---
@@ -27,27 +24,15 @@ BREED_NAMES = [
 print("Initializing Gatekeeper Model (MobileNetV2)...")
 gatekeeper_model = MobileNetV2(weights='imagenet')
 
-def build_model():
-    """Defines the architecture matching your training exactly."""
-    conv_base = VGG16(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
-    conv_base.trainable = False
-    model = Sequential([
-        conv_base, 
-        Flatten(), 
-        Dense(512, activation='relu'),   
-        Dropout(0.5), 
-        Dense(NUM_CLASSES, activation='softmax') 
-    ])
-    return model
-
 def initialize_model():
-    """Fetches model weights from public Hugging Face Hub."""
+    """Fetches full model from public Hugging Face Hub."""
     try:
         print(f"Connecting to Public Hugging Face Repo: {REPO_ID}...")
         model_path = hf_hub_download(repo_id=REPO_ID, filename=FILENAME)
         
-        model = build_model()
-        model.load_weights(model_path) 
+        # FIX: Load the entire model directly instead of building it from scratch
+        model = tf.keras.models.load_model(model_path) 
+        
         print(f"Custom Breed Model successfully loaded from Hugging Face.")
         return model
     except Exception as e:
