@@ -13,7 +13,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
 # --- 2. CONFIGURATION ---
-REPO_ID = "shah1zil/BreednNutrition" 
+REPO_ID = "shah1zil/Smart_Paws_Breed_Model" 
 FILENAME = "best_breed_model_v1.h5"
 IMAGE_SIZE = (224, 224)
 NUM_CLASSES = 10 
